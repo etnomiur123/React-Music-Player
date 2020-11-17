@@ -6,7 +6,7 @@ const LibrarySong = ({
   audioRef,
   isPlaying,
   songs,
-  setSongs,
+  setSongs
 }) => {
   const songSelectHandler = () => {
     setCurrentSong(song);
