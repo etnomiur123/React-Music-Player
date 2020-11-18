@@ -16,7 +16,7 @@ function App() {
   const [songInfo, setSongInfo] = useState({
     currentTime: 0,
     duration: 0,
-    animationPercentage: 0
+    animationPercentage: 0,
   });
 
   const timeUpdateHandler = (e) => {
@@ -24,14 +24,20 @@ function App() {
     const duration = e.target.duration;
     const roundedCurrent = Math.round(currentTime);
     const roundedDuration = Math.round(duration);
-    const animation = Math.round((roundedCurrent / roundedDuration) * 100)
-    setSongInfo({ ...songInfo, currentTime, duration, animationPercentage: animation });
+    const animation = Math.round((roundedCurrent / roundedDuration) * 100);
+    setSongInfo({
+      ...songInfo,
+      currentTime,
+      duration,
+      animationPercentage: animation,
+    });
   };
 
   const songEndHandler = async () => {
-    const index = songs.findIndex(el => el.id === currentSong.id);
+    const index = songs.findIndex((el) => el.id === currentSong.id);
+    await setCurrentSong(songs[index + 1]);
     const newSongs = songs.map((el) => {
-      if (el.id === currentSong.id) {
+      if (el.id === songs[index + 1].id) {
         return {
           ...el,
           active: true,
@@ -43,14 +49,13 @@ function App() {
         };
       }
     });
-    setSongs(newSongs);
-    await setCurrentSong(songs[index + 1])
-    if (isPlaying) audioRef.current.play()
-  }
+    await setSongs(newSongs);
+    if (isPlaying) audioRef.current.play();
+  };
 
   return (
     <div className={`App ${libraryStatus ? "library-active" : ""}`}>
-      <Nav libraryStatus={libraryStatus} setLibraryStatus={setLibraryStatus}/>
+      <Nav libraryStatus={libraryStatus} setLibraryStatus={setLibraryStatus} />
       <Song currentSong={currentSong} />
       <Player
         songInfo={songInfo}
