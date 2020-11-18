@@ -30,6 +30,20 @@ function App() {
 
   const songEndHandler = async () => {
     const index = songs.findIndex(el => el.id === currentSong.id);
+    const newSongs = songs.map((el) => {
+      if (el.id === currentSong.id) {
+        return {
+          ...el,
+          active: true,
+        };
+      } else {
+        return {
+          ...el,
+          active: false,
+        };
+      }
+    });
+    setSongs(newSongs);
     await setCurrentSong(songs[index + 1])
     if (isPlaying) audioRef.current.play()
   }
