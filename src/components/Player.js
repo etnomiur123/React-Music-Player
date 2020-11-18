@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPlay,
@@ -16,28 +16,26 @@ const Player = ({
   currentSong,
   setCurrentSong,
   songs,
-  setSongs
+  setSongs,
 }) => {
 
-useEffect(()=> {
-  const newSongs = songs.map((el) => {
-    if (el.id === currentSong.id) {
-      return {
-        ...el,
-        active: true,
-      };
-    } else {
-      return {
-        ...el,
-        active: false,
-      };
-    }
-  });
-  setSongs(newSongs);
+  const activeLibraryHandler = (nextPrev) => {
+    const newSongs = songs.map((el) => {
+      if (el.id === nextPrev.id) {
+        return {
+          ...el,
+          active: true,
+        };
+      } else {
+        return {
+          ...el,
+          active: false,
+        };
+      }
+    });
 
-
-});
-
+    setSongs(newSongs);
+  }
 
   const playSongHandler = () => {
     if (isPlaying) {
@@ -60,34 +58,53 @@ useEffect(()=> {
     setSongInfo({ ...songInfo, currentTime: e.target.value });
   };
 
-  const skipTrackHandler = (direction) => {
+  const skipTrackHandler = async (direction) => {
     const index = songs.findIndex((el) => el.id === currentSong.id);
 
     if (direction === "back") {
       if (!index) {
-        setCurrentSong(songs[songs.length - 1]);
+        await setCurrentSong(songs[songs.length - 1]);
+        activeLibraryHandler(songs[songs.length - 1])
       } else {
-        setCurrentSong(songs[index - 1]);
+        await setCurrentSong(songs[index - 1]);
+        activeLibraryHandler(songs[index - 1])
       }
     }
 
     if (direction === "forward") {
-      setCurrentSong(songs[(index + 1) % songs.length]);
+      await setCurrentSong(songs[(index + 1) % songs.length]);
+      activeLibraryHandler(songs[(index + 1) % songs.length])
     }
+
+    if (isPlaying) audioRef.current.play();
+  };
+
+  //Add the styles
+
+  const trackAnim = {
+    transform: `translateX(${songInfo.animationPercentage}%)`,
   };
 
   return (
     <div className="player">
       <div className="time-control">
         <p>{getTime(songInfo.currentTime)}</p>
-        <input
-          onChange={dragHandler}
-          min={0}
-          max={songInfo.duration || 0}
-          value={songInfo.currentTime}
-          type="range"
-        />
-        <p>{getTime(songInfo.duration)}</p>
+        <div
+          className="track"
+          style={{
+            background: `linear-gradient(to right, ${currentSong.color[0]},${currentSong.color[1]} )`,
+          }}
+        >
+          <input
+            onChange={dragHandler}
+            min={0}
+            max={songInfo.duration || 0}
+            value={songInfo.currentTime}
+            type="range"
+          />
+          <div className="animate-track" style={trackAnim}></div>
+        </div>
+        <p>{songInfo.duration ? getTime(songInfo.duration) : "0:00"}</p>
       </div>
       <div className="play-control">
         <FontAwesomeIcon
